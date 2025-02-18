@@ -8,19 +8,25 @@ from constants import SOLN, DESC
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 
-# Global list to store slides
+# Global variables for slide management
 slides_cache = []
+stop_generation = False
+generation_thread = None
 
 def generate_slides_in_background(description, solution):
     """Generates slides asynchronously and stores them in the global list."""
-    global slides_cache
+    global slides_cache, stop_generation
     slides_cache.clear()  # Clear previous slides before generating new ones
+    stop_generation = False
 
     for slide in get_slides(description, solution):
+        if stop_generation:
+            break
         slides_cache.append(slide)  # Append new slides as they are generated
         time.sleep(1)  # Simulate delay for async effect
 
-    slides_cache.append("DONE")
+    if not stop_generation:  # Only append DONE if we weren't stopped
+        slides_cache.append("DONE")
 
 @app.route("/get_solution", methods=["POST"])
 def get_solution():
@@ -34,8 +40,16 @@ def get_solution():
     solution = SOLN[problem_id]  
     description = DESC[problem_id]
 
-    # Start slide generation in a separate thread
-    threading.Thread(target=generate_slides_in_background, args=(description, solution), daemon=True).start()
+    global generation_thread
+    # Stop any existing slide generation
+    if generation_thread and generation_thread.is_alive():
+        global stop_generation
+        stop_generation = True
+        generation_thread.join(timeout=1)  # Wait for thread to finish
+
+    # Start new slide generation in a separate thread
+    generation_thread = threading.Thread(target=generate_slides_in_background, args=(description, solution), daemon=True)
+    generation_thread.start()
 
     return jsonify({"solution": solution})  # ✅ Chatbot gets response immediately!
 
@@ -54,6 +68,21 @@ def get_slides_stream():
                 time.sleep(0.5)
 
     return Response(stream_slides(), content_type="application/json")
+
+@app.route("/stop_slides", methods=["POST"])
+def stop_slides():
+    """Stops slide generation and clears the cache."""
+    global stop_generation, slides_cache, generation_thread
+    
+    # Set stop flag and wait for thread to finish
+    stop_generation = True
+    if generation_thread and generation_thread.is_alive():
+        generation_thread.join(timeout=1)
+    
+    # Clear the cache
+    slides_cache.clear()
+    
+    return jsonify({"status": "success"})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

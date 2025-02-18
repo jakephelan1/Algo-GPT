@@ -7,9 +7,10 @@ interface RightPanelProps {
   slides: string[];
   onClose: () => void;
   onLeaveProblem: () => void;
+  onClearSlides?: () => Promise<void>;
 }
 
-const RightPanel: React.FC<RightPanelProps> = ({ slides, onClose, onLeaveProblem }) => {
+const RightPanel: React.FC<RightPanelProps> = ({ slides, onClose, onLeaveProblem, onClearSlides }) => {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
   // ✅ Auto-update to the latest slide when slides update
@@ -21,7 +22,20 @@ const RightPanel: React.FC<RightPanelProps> = ({ slides, onClose, onLeaveProblem
 
   return (
     <div className="bg-gray-100 border-l flex flex-col h-screen">
-      <button onClick={onClose}><X size={20} /></button>
+      <div className="flex justify-end p-2">
+        <button 
+          onClick={async () => {
+            if (onClearSlides) {
+              await onClearSlides();
+            } else {
+              onClose();
+            }
+          }}
+          className="hover:bg-gray-200 rounded-full p-1"
+        >
+          <X size={20} />
+        </button>
+      </div>
 
       {slides.length > 0 ? (
         <div dangerouslySetInnerHTML={{ __html: slides[currentSlideIndex] }} />

@@ -17,6 +17,18 @@ const Chat = () => {
     setShowBoxes(true);
   };
 
+  const handleClearSlides = async () => {
+    try {
+      // Stop slide generation
+      await fetch("http://127.0.0.1:5000/stop_slides", { method: "POST" });
+      // Clear slides from state
+      setSlides([]);
+      setShowRightPanel(false);
+    } catch (error) {
+      console.error("Error clearing slides:", error);
+    }
+  };
+
   return (
     <PanelGroup direction="horizontal">
       {/* Left Panel - Chat */}
@@ -55,7 +67,8 @@ const Chat = () => {
           <RightPanel 
             slides={slides}  // ✅ Pass slides
             onClose={() => setShowRightPanel(false)} 
-            onLeaveProblem={handleLeaveProblem} 
+            onLeaveProblem={handleLeaveProblem}
+            onClearSlides={handleClearSlides}
           />
         </Panel>
       )}
