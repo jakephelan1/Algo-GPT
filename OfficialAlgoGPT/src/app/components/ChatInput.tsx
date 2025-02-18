@@ -87,33 +87,36 @@ const ChatInput: FC<ChatInputProps> = ({ className, onShowRightPanel, setSlides,
       if (!matcher) throw new Error("Matcher not initialized");
 
       const problemNumber = await matcher.findRelevantProblem(message.text);
-      if (problemNumber === 0) {
-        toast.error("No matching problem found");
-        return null;
-      }
-
-      // ✅ Request solution from backend
-      const solnResponse = await fetch('http://127.0.0.1:5000/get_solution', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ problemNumber }),
-      });
-
-      if (!solnResponse.ok) {
-        throw new Error("Failed to fetch solution");
-      }
-
-      const { solution } = await solnResponse.json(); // ✅ Get immediate chatbot response
-
-      // ✅ Start streaming slides in background
-      fetchSlides();
+      
+      let solution = null;
+      if (problemNumber !== 0) {
+        const solnResponse = await fetch('http://127.0.0.1:5000/get_solution', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ problemNumber }),
+        });
+  
+        if (!solnResponse.ok) {
+          throw new Error("Failed to fetch solution");
+        }
+  
+        const { solution: fetchedSolution } = await solnResponse.json(); 
+        solution = fetchedSolution;
+  
+        // ✅ Start streaming slides in background
+        fetchSlides();
+      } 
 
       const userQuery = message.text;
       const formattedMessage = { id: message.id, isUserMessage: message.isUserMessage, text: userQuery };
 
       console.log("Sending message:", JSON.stringify({ messages: [formattedMessage] }, null, 2));
+      
+      let desc = null;
+      if (problemNumber != 0) {
+        desc = matcher.getProblemDescription(problemNumber);
+      } 
 
-      const desc = matcher.getProblemDescription(problemNumber);
 
       // ✅ Send solution & description to chatbot API
       const response = await fetch("/api/message", {
