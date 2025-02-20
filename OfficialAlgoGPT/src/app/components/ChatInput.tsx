@@ -16,9 +16,10 @@ interface ChatInputProps extends HTMLAttributes<HTMLDivElement> {
   onShowRightPanel: () => void;
   setSlides: (slides: string[] | ((prevSlides: string[]) => string[])) => void; // ✅ Correct Typing
   disabled?: boolean;
+  slideContext?: string | null;
 }
 
-const ChatInput: FC<ChatInputProps> = ({ className, onShowRightPanel, setSlides, disabled, ...props }) => {
+const ChatInput: FC<ChatInputProps> = ({ className, onShowRightPanel, setSlides, disabled, slideContext, ...props }) => {
   const [input, setInput] = useState<string>('');
   const {
     addMessage,
@@ -122,7 +123,7 @@ const ChatInput: FC<ChatInputProps> = ({ className, onShowRightPanel, setSlides,
       const response = await fetch("/api/message", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: [formattedMessage], id: problemNumber, solution: solution, desc: desc }),
+        body: JSON.stringify({ messages: [formattedMessage], id: problemNumber, solution: solution, desc: desc, slideContext: slideContext || null }),
       });
 
       if (!response.ok) throw new Error("Error fetching chatbot response");
