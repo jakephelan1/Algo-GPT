@@ -12,6 +12,19 @@ Algo-GPT is a modern web application built with Next.js that provides an interac
 - Syntax highlighting for code snippets
 - Step-by-step algorithm visualization
 
+## Development
+
+### Project Structure
+```
+algo-gpt/
+├── app/             # Next.js app directory
+├── components/      # Reusable React components
+├── lib/             # Utility functions and helpers
+├── public/          # Static assets
+├── styles/          # Global styles and Tailwind config
+└── types/           # TypeScript type definitions
+```
+
 ### Tools Used
 **Next.js:** React framework for production-grade applications
 
@@ -93,19 +106,6 @@ Once the application is running, open your web browser and navigate to http://lo
 - View algorithm explanations and implementations
 - Get AI-powered assistance
 - Visualize algorithm execution
-
-## Development
-
-### Project Structure
-```
-algo-gpt/
-├── app/             # Next.js app directory
-├── components/      # Reusable React components
-├── lib/             # Utility functions and helpers
-├── public/          # Static assets
-├── styles/          # Global styles and Tailwind config
-└── types/           # TypeScript type definitions
-```
 
 ### Contributing
 1. Fork the repository
