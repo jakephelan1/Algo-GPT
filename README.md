@@ -2,6 +2,9 @@
 
 Created by: Jake Phelan, Jenny Jung
 
+## Short Demo
+https://github.com/user-attachments/assets/7cb87cf1-635d-4166-b5f1-979c3fd4f546
+
 ## Project Overview
 Algo-GPT is a modern web application built with Next.js that provides an interactive platform for learning and practicing algorithms and data structures. The application leverages AI capabilities to help users understand complex algorithmic concepts and improve their problem-solving skills.
 
