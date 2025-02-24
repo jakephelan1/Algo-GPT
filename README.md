@@ -19,7 +19,7 @@ Algo-GPT is a modern web application built with Next.js that provides an interac
 
 ### Project Structure
 ```
-algo-gpt/
+OfficialAlgoGPT/
 ├── app/             # Next.js app directory
 ├── components/      # Reusable React components
 ├── lib/             # Utility functions and helpers
