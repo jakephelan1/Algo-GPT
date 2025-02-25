@@ -83,6 +83,8 @@ const ChatInput: FC<ChatInputProps> = ({ className, onShowRightPanel, setSlides,
     }
   };
 
+  const { messages: chatHistory } = useContext(MessagesContext);
+
   const { mutate: sendMessage, isPending } = useMutation({
     mutationFn: async (message: Message) => {
       if (!matcher) throw new Error("Matcher not initialized");
@@ -111,19 +113,26 @@ const ChatInput: FC<ChatInputProps> = ({ className, onShowRightPanel, setSlides,
       const userQuery = message.text;
       const formattedMessage = { id: message.id, isUserMessage: message.isUserMessage, text: userQuery };
 
-      console.log("Sending message:", JSON.stringify({ messages: [formattedMessage] }, null, 2));
+      // Get the last few messages from chat history (limit to last 10 messages to avoid token limits)
+      const recentMessages = [...chatHistory.slice(-10), formattedMessage];
+      console.log("Sending messages with history:", JSON.stringify({ messages: recentMessages }, null, 2));
       
       let desc = null;
       if (problemNumber != 0) {
         desc = matcher.getProblemDescription(problemNumber);
       } 
 
-
-      // ✅ Send solution & description to chatbot API
+      // ✅ Send solution, description, and chat history to chatbot API
       const response = await fetch("/api/message", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: [formattedMessage], id: problemNumber, solution: solution, desc: desc, slideContext: slideContext || null }),
+        body: JSON.stringify({ 
+          messages: recentMessages,
+          id: problemNumber, 
+          solution: solution, 
+          desc: desc, 
+          slideContext: slideContext || null 
+        }),
       });
 
       if (!response.ok) throw new Error("Error fetching chatbot response");

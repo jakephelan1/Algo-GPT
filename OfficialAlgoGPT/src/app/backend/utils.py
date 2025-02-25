@@ -21,6 +21,7 @@ def get_slides(question: str, solution: str) -> Generator[dict, None, None]:
     prompt = f"""
     You are a code analyst. Given a coding problem and a solution, 
     split the solution into 4-9 meaningful segments, each with an explanation.
+    Do not generate any new code.
 
     - Problem: {question}
     - Solution: {solution}
