@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
 export async function POST(req: Request) {
-  const { query, problems } = await req.json();
+  const { queries, problems } = await req.json();
 
   if (!process.env.OPENAI_API_KEY) {
     return NextResponse.json({ error: "OpenAI API key is missing" }, { status: 500 });
@@ -11,29 +11,43 @@ export async function POST(req: Request) {
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
   try {
-    const prompt = `
+    const formattedQueries = queries
+      .slice(0, queries.length - 1) 
+      .map((query: any) => {
+        if (query.isUserMessage) {
+          return `Human: ${query.text}`;
+        } else {
+          return `AI: ${query.text}`;
+        }
+      })
+      .join("\n");
+
+    const currentQuery = `Human: ${queries[queries.length - 1].text}`;
+
+    const helper = `
+      You are a helpful assistant that matches user queries to LeetCode problems. 
       Available LeetCode Problems:
-      ${problems.map((p: any) => `${p.number}. ${p.title} (${p.difficulty}): ${p.description} Tags: ${p.tags}`).join("\n")}
+      ${problems.map((p: any) => `${p.number}. ${p.title} (${p.difficulty}) Tags: ${p.tags}`).join("\n")}
 
-      User Query: "${query}"
-      
-      Which problem number (just the number) best matches this query?
-      Consider problem descriptions, titles, and tags.
-      Return ONLY the number.
+      Conversation History:
+      ${formattedQueries}
 
-      **If you cannot find a match or the user query is not specific enough, return 0.**
-    `;
+      Which problem number best matches the user's query?
+      - If no clear match exists, return 0.
+      - Respond only with the number.
+      `;
 
+    console.log(`Matcher prompt: ${helper}`)
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [
         {
           role: "system",
-          content: "You are a helpful assistant that matches user queries to LeetCode problems. Return ONLY the problem number."
+          content: helper
         },
         {
           role: "user",
-          content: prompt
+          content: currentQuery
         }
       ],
       temperature: 0.3,
@@ -43,6 +57,8 @@ export async function POST(req: Request) {
     const match = content.match(/\d+/);
     const problemNumber = match ? parseInt(match[0], 10) : 0;
 
+    console.log(problemNumber)
+
     return NextResponse.json({ problemNumber });
 
   } catch (error) {
@@ -50,5 +66,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Failed to match question" }, { status: 500 });
   }
 }
-
-

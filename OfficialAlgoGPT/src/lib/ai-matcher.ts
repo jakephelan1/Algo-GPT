@@ -30,12 +30,12 @@ export class AILeetCodeMatcher {
     }
   }
 
-  public async findRelevantProblem(query: string): Promise<number> {
+  public async findRelevantProblem(queries: { id: string; isUserMessage: boolean; text: string; }[]): Promise<number> {
     try {
       const response = await fetch('/api/match', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, problems: this.problems }),
+        body: JSON.stringify({ queries, problems: this.problems }),
       });
 
       const data = await response.json();

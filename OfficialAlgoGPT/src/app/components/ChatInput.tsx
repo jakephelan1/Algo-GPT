@@ -88,8 +88,9 @@ const ChatInput: FC<ChatInputProps> = ({ className, onShowRightPanel, setSlides,
   const { mutate: sendMessage, isPending } = useMutation({
     mutationFn: async (message: Message) => {
       if (!matcher) throw new Error("Matcher not initialized");
-
-      const problemNumber = await matcher.findRelevantProblem(message.text);
+      
+      const recentMessages = [...chatHistory.slice(-5)];
+      const problemNumber = await matcher.findRelevantProblem(recentMessages);
       
       let solution = null;
       if (problemNumber !== 0) {
@@ -106,15 +107,9 @@ const ChatInput: FC<ChatInputProps> = ({ className, onShowRightPanel, setSlides,
         const { solution: fetchedSolution } = await solnResponse.json(); 
         solution = fetchedSolution;
   
-        // ✅ Start streaming slides in background
         fetchSlides();
       } 
-
-      const userQuery = message.text;
-      const formattedMessage = { id: message.id, isUserMessage: message.isUserMessage, text: userQuery };
-
-      // Get the last few messages from chat history (limit to last 10 messages to avoid token limits)
-      const recentMessages = [...chatHistory.slice(-10), formattedMessage];
+      
       console.log("Sending messages with history:", JSON.stringify({ messages: recentMessages }, null, 2));
       
       let desc = null;
