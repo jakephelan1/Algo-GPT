@@ -8,7 +8,6 @@ export async function POST(req: Request) {
 
     try {
         body = await req.json();
-        console.log("Received request body:", JSON.stringify(body.messages, null, 2)); // ✅ Log request body
     } catch (error) {
         return new Response("Invalid JSON", { status: 400 });
     }
@@ -17,8 +16,7 @@ export async function POST(req: Request) {
         console.error("Missing messages array:", body);
         return new Response("Missing messages array", { status: 400 });
     }
-
-    console.log("Messages before parsing:", body.messages); 
+ 
 
     let parsedMessages;
     try {
@@ -28,7 +26,6 @@ export async function POST(req: Request) {
         return new Response(JSON.stringify(error), { status: 400 });
     }
 
-    console.log("Parsed messages:", parsedMessages); 
 
     const outboundMessages: ChatGPTMessage[] = parsedMessages.map((message) => ({
         role: message.isUserMessage ? "user" : "system",

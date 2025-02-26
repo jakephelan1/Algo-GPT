@@ -37,7 +37,6 @@ export async function POST(req: Request) {
       - Respond only with the number.
       `;
 
-    console.log(`Matcher prompt: ${helper}`)
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [
