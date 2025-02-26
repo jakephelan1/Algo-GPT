@@ -39,6 +39,8 @@ OfficialAlgoGPT/
 
 **OpenAI:** AI integration for algorithm explanations
 
+**Anthropic:** AI integration for algorithm visualizations
+
 **Flask:** Handles integration between frontend and backend for slide generation and solution fetching
 
 **Heroicons & Lucide:** Beautiful hand-crafted SVG icons
